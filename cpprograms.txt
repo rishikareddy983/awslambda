@@ -1,0 +1,386 @@
+import java.io.*;
+class Trie
+{
+    static class TrieNode {
+        TrieNode[] children;
+        boolean isEndOfWord;
+        TrieNode() {
+            children = new TrieNode[26];
+            isEndOfWord = false;
+        }
+    }
+    TrieNode root;
+    Trie() {
+        root = new TrieNode();
+    }
+    void insert(String word) {
+        TrieNode current = root;
+        for (char ch : word.toCharArray()) {
+            int index = ch - 'a';
+            if (current.children[index] == null) {
+                current.children[index] = new TrieNode();
+            }
+            current = current.children[index];
+        }
+        current.isEndOfWord = true;
+    }
+    
+    //if any supporting functionalities, should go here
+    
+    List<Boolean> search(String[] word) {
+        //implement your code here and return list of boolean values
+        int n=word.length;
+        List<boolean>result=new ArrayList<>();
+        for(int i=0;i<n;i++)
+        {
+            String s=word[i];
+            int length=s.length();
+            int index;
+            for(int level=0;level<length;level++)
+            {
+                index=key.charAt(level)-'a';
+                if(currentNode.children[index]==null)return false;
+                currentNode=currentNode.children[index];
+            }
+             result.add(currentNode.isEndOfWord);
+        }
+        return result;
+    }
+    
+}
+class SearchList 
+{
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Trie trie = new Trie();
+        int n = scanner.nextInt();
+		scanner.nextLine();
+		String[] word= scanner.nextLine().split(",");
+        for (int i = 0; i < n; i++) {
+            trie.insert(word[i]);
+        }
+        int m = scanner.nextInt();
+		scanner.nextLine();
+		String[] words = scanner.nextLine().split(",");
+		System.out.println(trie.search(words));
+    }
+}
+
+******************************************************************************************
+An 8th standard student has been assigned a task as part of punishment for his mistake.
+
+The task is, there is an input string STR(without any space) and an array of 
+strings words[]. Print all the pairs of indices [s, e] where s, e are starting 
+index and ending index of every string in words[] in the input string STR.
+
+Note: Print the pairs[s, e] in sorted order.
+(i.e., sort them by their first coordinate, and in case of ties sort them by 
+their second coordinate).
+
+Input Format
+------------
+Line-1: string STR(without any space)
+Line-2: space separated strings, words[]
+
+Output Format
+-------------
+Print the pairs[s, e] in sorted order.
+
+
+Sample Input-1:
+---------------
+thekmecandngitcolleges
+kmec ngit colleges
+
+Sample Output-1:
+----------------
+3 6
+10 13
+14 21
+
+
+Sample Input-2:
+---------------
+xyxyx
+xyx xy
+
+Sample Output-2:
+----------------
+0 1
+0 2
+2 3
+2 4
+
+Explanation: 
+------------
+Notice that matches can overlap, see "xyx" is found at [0,2] and [2,4].
+
+
+Sample Input-3:
+---------------
+kmecngitkmitarecsecolleges
+kmit ngit kmec cse
+
+Sample Output-3:
+----------------
+0 3
+4 7
+8 11
+15 17
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+******************************************************************************************************
+
+
+import java.util.Scanner;
+
+public class crc {
+    
+    // Function to perform XOR operation
+    private static String xor(String dividend, String divisor) {
+        StringBuilder result = new StringBuilder();
+        
+        for (int i = 1; i < divisor.length(); i++) {
+            result.append(dividend.charAt(i) == divisor.charAt(i) ? '0' : '1');
+        }
+        
+        return result.toString();
+    }
+    
+    // Function to perform division and get the CRC remainder
+    private static String mod2Division(String dividend, String divisor) {
+        int pick = divisor.length();
+        String tmp = dividend.substring(0, pick);
+        
+        while (pick < dividend.length()) {
+            if (tmp.charAt(0) == '1') {
+                tmp = xor(tmp, divisor) + dividend.charAt(pick);
+            } else {
+                tmp = xor(tmp, "0".repeat(divisor.length())) + dividend.charAt(pick);
+            }
+            pick++;
+        }
+        
+        if (tmp.charAt(0) == '1') {
+            tmp = xor(tmp, divisor);
+        } else {
+            tmp = xor(tmp, "0".repeat(divisor.length()));
+        }
+        
+        return tmp;
+    }
+    
+    // Function to encode data using CRC
+    public static String encodeData(String data, String generator) {
+        int dataLen = data.length();
+        int generatorLen = generator.length();
+        
+        String appendedData = data + "0".repeat(generatorLen - 1);
+        String remainder = mod2Division(appendedData, generator);
+        
+        return data + remainder;
+    }
+    
+    // Function to check for errors in received data
+    public static boolean checkData(String receivedData, String generator) {
+        String remainder = mod2Division(receivedData, generator);
+        return remainder.contains("1"); // If remainder has 1, error is present
+    }
+    
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.print("Enter dataword (binary): ");
+        String data = scanner.next();
+        
+        System.out.print("Enter generator polynomial (binary): ");
+        String generator = scanner.next();
+        
+        String codeword = encodeData(data, generator);
+        System.out.println("Encoded data (Codeword): " + codeword);
+        
+        System.out.print("Enter received data (binary) to check for errors: ");
+        String receivedData = scanner.next();
+        
+        if (checkData(receivedData, generator)) {
+            System.out.println("Error detected in received data.");
+        } else {
+            System.out.println("No error detected.");
+        }
+        
+        scanner.close();
+    }
+}
+
+
+******************************************************************************************************************
+
+import java.util.*;
+public class Main{
+	public static void main(String[] args) {
+		Scanner sc=new Scanner(System.in);
+		System.out.print("Enter window size: ");
+		int ws=sc.nextInt();
+		System.out.print("Enter number of frames to transmit: ");
+		int fs=sc.nextInt();
+		System.out.print("Enter "+fs+" frames: ");
+		int f[]=new int[fs];
+		for(int i=0 ; i<fs; i++){
+		    f[i]=sc.nextInt();
+		}
+		List<Integer> l=new ArrayList<>();
+		for(int i=0; i<fs; i++){
+		if(l.size()==ws){
+	    System.out.println("After sending "+ws+" at each stage sender waits for acknowledgement sent by the receiver");
+		System.out.println(l);
+		System.out.println("Acknowledgement of above frames sent is received by sender");
+		l.clear();
+		}
+		l.add(f[i]);
+		if(i==fs-1){
+		    System.out.println(l);
+		    System.out.println("Acknowledgement of above frames sent is received by sender");
+		    }
+		}
+	}
+
+
+*****************************************************************************************************************
+
+
+
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+class DataLinkLayer {
+    private final int WINDOW_SIZE = 4; 
+    private final int TOTAL_FRAMES = 10; 
+    private int base = 0; 
+    private int nextSeqNum = 0;
+    private boolean[] ackReceived;
+    private Random random;
+
+    public DataLinkLayer() {
+        ackReceived = new boolean[TOTAL_FRAMES];
+        random = new Random();
+    }
+
+    public void sendFrames() {
+        System.out.println("Starting transmission using Go-Back-N protocol...");
+
+        while (base < TOTAL_FRAMES) {
+          
+            while (nextSeqNum < base + WINDOW_SIZE && nextSeqNum < TOTAL_FRAMES) {
+                sendFrame(nextSeqNum);
+                nextSeqNum++;
+            }
+
+          
+            waitForAcknowledgment();
+        }
+
+        System.out.println("All frames transmitted successfully!");
+    }
+
+    private void sendFrame(int frameNum) {
+        System.out.println("Sending frame: " + frameNum);
+    }
+
+    private void waitForAcknowledgment() {
+        try {
+            TimeUnit.MILLISECONDS.sleep(500); 
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Randomly simulate ACK loss
+        if (random.nextInt(10) < 3) {
+            System.out.println("ACK lost for frame: " + base + ". Resending window...");
+            nextSeqNum = base;
+            return;
+        }
+
+       
+        System.out.println("Acknowledgment received for frame: " + base);
+        ackReceived[base] = true;
+        base++; 
+    }
+}
+
+ class SlidingWindowGoBackN {
+    public static void main(String[] args) {
+        DataLinkLayer dll = new DataLinkLayer();
+        dll.sendFrames();
+    }
+}
+
+
+******************************************************************************************************************
+
+
+import java.util.*;
+public class gobackn{
+public static void main(String[] args)
+{
+    Scanner sc = new Scanner(System.in);
+    System.out.print("please enter the window size: ");
+    int n = sc.nextInt();
+    for (int i = 0; i < n; i++)
+    {
+        System.out.println("frame " + i + " has been transmitted");
+    }
+    System.out.print("please enter the last acknowledgement received: ");
+    int ack = sc.nextInt();
+    for (int i = ack; i < ack + n; i++) 
+    {
+        System.out.println("frame " + i + " has been transmitted");
+    }
+    sc.close();
+}
+}
