@@ -460,3 +460,42 @@ public static void main(String[] args)
     sc.close();
 }
 }
+
+************************************************************************************************************************
+import java.util.Scanner;
+
+public class PracticeCRC_GoBackN {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter window size: ");
+        int k = sc.nextInt();
+
+        System.out.print("Enter total number of frames: ");
+        int totalFrames = sc.nextInt();
+
+        int frame = 1;
+
+        while (frame <= totalFrames) {
+            int end = Math.min(frame + k - 1, totalFrames);
+
+            // Send window of frames
+            for (int i = frame; i <= end; i++) {
+                System.out.println("Frame " + i + " sent");
+            }
+
+            System.out.print("Enter last ACK received (0 for no ACK): ");
+            int ack = sc.nextInt();
+
+            if (ack >= frame && ack <= end) {
+                frame = ack + 1;
+                System.out.println("ACK " + ack + " received. Moving window to frame " + frame);
+            } else {
+                System.out.println("ACK not received or invalid. Resending from frame " + frame);
+            }
+        }
+
+        System.out.println("\nAll frames have been sent successfully.");
+        sc.close();
+    }
+}
+
