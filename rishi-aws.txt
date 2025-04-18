@@ -1,0 +1,502 @@
+
+============================
+1. WORD COUNT - FinalSteps
+============================
+
+Step-by-Step Commands:
+----------------------
+1. Open Eclipse
+   File → New → Java Project → Project Name: WordCount → Next
+   Libraries → Add External JARs:
+     - /usr/lib/hadoop (select all)
+     - /usr/lib/hadoop/client (select all)
+   → Finish
+
+2. Create Class:
+   Right-click src → New → Class → Name: WordCount → Finish
+   → Paste the WordCount code
+
+3. Export Project:
+   Right-click WordCount → Export → Java → JAR file → Next
+   → Browse to /home/cloudera → Name: WordCount.jar → Finish
+
+4. Open Terminal:
+   $ ls
+   $ pwd
+   $ cat > /home/cloudera/Processfile1.txt
+     (type the words and press Ctrl+Z)
+
+5. View File:
+   $ cat /home/cloudera/Processfile1.txt
+
+6. Check HDFS:
+   $ hdfs dfs -ls
+   $ hdfs dfs -ls /
+
+7. Create Input Folder and Upload File:
+   $ hdfs dfs -mkdir /inputfolder1
+   $ hdfs dfs -put /home/cloudera/Processfile1.txt /inputfolder1/
+
+8. View File in HDFS:
+   $ hdfs dfs -cat /inputfolder1/Processfile1.txt
+
+9. Run Hadoop Job:
+   $ hadoop jar /home/cloudera/WordCount.jar WordCount /inputfolder1/Processfile1.txt /out1
+
+10. View Output:
+   $ hdfs dfs -ls /out1
+   $ hdfs dfs -cat /out1/part-r-00000
+
+
+=======================================================
+2. EMPLOYEE SALARY MAPREDUCE - FinalSteps
+=======================================================
+
+1. Open Eclipse → File → New → Java Project: EmployeeSalaryProject
+
+2. Add Hadoop Libraries:
+   - /usr/lib/hadoop (all JARs)
+   - /usr/lib/hadoop/client (all JARs)
+
+3. Create Class → Name: EmployeeSalary → Paste code
+
+4. Export JAR to: /home/cloudera/EmployeeSalary.jar
+
+5. Create Input File:
+   $ cat > /home/cloudera/employee.txt
+     emp1 dept1 5000
+     emp2 dept1 6000
+     emp3 dept2 4500
+     emp4 dept2 5500
+     emp5 dept3 7000
+     (Press Ctrl+Z)
+
+6. View File:
+   $ cat /home/cloudera/employee.txt
+
+7. Upload to HDFS:
+   $ hdfs dfs -mkdir /empinput
+   $ hdfs dfs -put /home/cloudera/employee.txt /empinput/
+   $ hdfs dfs -ls /empinput
+   $ hdfs dfs -cat /empinput/employee.txt
+
+8. Run Job:
+   $ hadoop jar /home/cloudera/EmployeeSalary.jar com.example.employeesalary.EmployeeSalary /empinput/employee.txt /empoutput
+
+9. If exists:
+   $ hdfs dfs -rm -r /empoutput
+
+10. View Output:
+    $ hdfs dfs -ls /empoutput
+    $ hdfs dfs -cat /empoutput/part-r-00000
+
+
+=======================================================
+3. READ/WRITE FILE SYSTEM AND HDFS - FinalSteps
+=======================================================
+
+1. Create Local File:
+   $ gedit /home/cloudera/sample.txt
+   Content: 
+     This is a sample file.
+     It will be copied to HDFS.
+
+2. Start Hadoop if needed:
+   $ jps
+   $ start-all.sh
+
+3. Java Program Directory:
+   $ mkdir -p /home/cloudera/Desktop/hdfsfileop
+   $ cd /home/cloudera/Desktop/hdfsfileop
+   $ gedit HDFSFileOperations.java → Paste code
+
+4. Compile:
+   $ javac -classpath `hadoop classpath` -d . HDFSFileOperations.java
+
+5. Run:
+   $ java -classpath `hadoop classpath`:. HDFSFileOperations
+
+6. Verify:
+   $ hdfs dfs -ls /user/cloudera
+   $ hdfs dfs -cat /user/cloudera/sample.txt
+
+
+=======================================================
+4. COPY FILE BETWEEN HDFS DIRECTORIES - FinalSteps
+=======================================================
+
+1. Start Hadoop:
+   $ start-all.sh
+   $ jps
+
+2. Create and Upload File:
+   $ gedit /home/cloudera/sample.txt
+     This is a test file in source directory.
+   $ hdfs dfs -mkdir -p /user/hadoop/source
+   $ hdfs dfs -put /home/cloudera/sample.txt /user/hadoop/source/
+
+3. Java Program Setup:
+   $ mkdir -p ~/Desktop/hdfsdircopy
+   $ cd ~/Desktop/hdfsdircopy
+   $ gedit HDFSDirectoryOperations.java → Paste code
+
+4. Compile and Run:
+   $ javac -classpath `hadoop classpath` -d . HDFSDirectoryOperations.java
+   $ java -classpath `hadoop classpath`:. HDFSDirectoryOperations
+
+5. Verify:
+   $ hdfs dfs -ls /user/hadoop/destination
+   $ hdfs dfs -cat /user/hadoop/destination/sample.txt
+
+================================================================================
+MaxTemperature
+================================================================================
+=======================================================
+5. MAX TEMPERATURE - FinalSteps Format
+=======================================================
+
+1. Open Eclipse and Create a New Java Project:
+   File → New → Java Project
+   Project Name: MaxTemperatureProject
+   Click Next
+
+2. Add Hadoop Libraries:
+   Click on Libraries tab
+   Click Add External JARs
+   - Go to: /usr/lib/hadoop → Select all JARs → Click OK
+   - Go to: /usr/lib/hadoop/client → Select all JARs → Click OK
+   Click Finish
+
+3. Create Java Class:
+   In src folder, right-click → New → Class
+   Class Name: MaxTemperature
+   Click Finish
+   Paste the MaxTemperature.java code
+
+4. Export Project as JAR File:
+   Right-click MaxTemperature.java → Export → Java → JAR file
+   Click Next
+   JAR file path: /home/cloudera/MaxTemperature.jar
+   Click Finish
+
+5. Prepare the Input File:
+   $ cat > /home/cloudera/weather_data.txt
+   1950 30
+   1950 32
+   1951 25
+   1951 28
+   1951 35
+   1952 31
+   1952 29
+   1952 33
+   (Ctrl + D to save)
+
+6. Upload Input File to HDFS:
+   $ hdfs dfs -mkdir /weatherinput
+   $ hdfs dfs -put /home/cloudera/weather_data.txt /weatherinput/
+   $ hdfs dfs -ls /weatherinput
+   $ hdfs dfs -cat /weatherinput/weather_data.txt
+
+7. Run the Hadoop Job:
+   $ hadoop jar /home/cloudera/MaxTemperature.jar MaxTemperature /weatherinput /weatheroutput
+
+   ❗ If /weatheroutput already exists:
+   $ hdfs dfs -rm -r /weatheroutput
+
+8. View the Output:
+   $ hdfs dfs -ls /weatheroutput
+   $ hdfs dfs -cat /weatheroutput/part-r-00000
+
+Expected Output:
+----------------
+1950 32
+1951 35
+1952 33
+
+
+
+=======================================================
+CODE SECTION
+=======================================================
+
+1. WordCount.java
+(from wordcountprogram.docx)
+-------------------------------------------------------
+
+import java.io.IOException;
+import java.util.StringTokenizer;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class WordCount {
+
+  public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable>{
+    private final static IntWritable one = new IntWritable(1);
+    private Text word = new Text();
+
+    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+      StringTokenizer itr = new StringTokenizer(value.toString());
+      while (itr.hasMoreTokens()) {
+        word.set(itr.nextToken());
+        context.write(word, one);
+      }
+    }
+  }
+
+  public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWritable> {
+    private IntWritable result = new IntWritable();
+
+    public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+      int sum = 0;
+      for (IntWritable val : values) {
+        sum += val.get();
+      }
+      result.set(sum);
+      context.write(key, result);
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    Job job = Job.getInstance(conf, "word count");
+    job.setJarByClass(WordCount.class);
+    job.setMapperClass(TokenizerMapper.class);
+    job.setCombinerClass(IntSumReducer.class);
+    job.setReducerClass(IntSumReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    System.exit(job.waitForCompletion(true) ? 0 : 1);
+  }
+}
+
+
+2. EmployeeSalary.java
+(from EMP-SALART-MAP-REDUCER.docx)
+-------------------------------------------------------
+
+package com.example.employeesalary;
+
+import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class EmployeeSalary {
+
+    public static class SalaryMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+        private Text department = new Text();
+        private IntWritable salary = new IntWritable();
+
+        @Override
+        protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+            String line = value.toString();
+            String[] fields = line.split("\s+");
+            if (fields.length == 3) {
+                department.set(fields[1]);
+                salary.set(Integer.parseInt(fields[2]));
+                context.write(department, salary);
+            }
+        }
+    }
+
+    public static class SalaryReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+        @Override
+        protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            int sum = 0;
+            for (IntWritable val : values) {
+                sum += val.get();
+            }
+            context.write(key, new IntWritable(sum));
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length != 2) {
+            System.err.println("Usage: EmployeeSalary <input path> <output path>");
+            System.exit(-1);
+        }
+
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "Employee Salary Sum");
+
+        job.setJarByClass(EmployeeSalary.class);
+        job.setMapperClass(SalaryMapper.class);
+        job.setReducerClass(SalaryReducer.class);
+
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
+}
+
+
+3. MaxTemperature.java
+(from Find Maximum Temperature in Weather Dataset.docx)
+-------------------------------------------------------
+
+import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class MaxTemperature {
+
+    public static class MaxTempMapper extends Mapper<Object, Text, Text, IntWritable> {
+        private Text year = new Text();
+        private IntWritable temperature = new IntWritable();
+
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            String[] fields = value.toString().split("\s+");
+            if (fields.length == 2) {
+                year.set(fields[0]);
+                temperature.set(Integer.parseInt(fields[1]));
+                context.write(year, temperature);
+            }
+        }
+    }
+
+    public static class MaxTempReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+        public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            int maxTemp = Integer.MIN_VALUE;
+            for (IntWritable val : values) {
+                maxTemp = Math.max(maxTemp, val.get());
+            }
+            context.write(key, new IntWritable(maxTemp));
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "Max Temperature");
+        job.setJarByClass(MaxTemperature.class);
+        job.setMapperClass(MaxTempMapper.class);
+        job.setReducerClass(MaxTempReducer.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
+}
+
+
+4. HDFSFileOperations.java
+(from EXP-2.docx)
+-------------------------------------------------------
+
+import java.io.*;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.*;
+
+public class HDFSFileOperations {
+
+    public static void main(String[] args) throws IOException {
+        Configuration conf = new Configuration();
+        conf.set("fs.defaultFS", "hdfs://quickstart.cloudera:8020");
+        FileSystem fs = FileSystem.get(conf);
+        Path localFilePath = new Path("/home/user/sample.txt");
+        Path hdfsFilePath = new Path("/user/hadoop/sample.txt");
+
+        writeFileToHDFS(fs, localFilePath, hdfsFilePath);
+        readFileFromHDFS(fs, hdfsFilePath);
+        fs.close();
+    }
+
+    public static void writeFileToHDFS(FileSystem fs, Path localPath, Path hdfsPath) throws IOException {
+        FSDataOutputStream outputStream = fs.create(hdfsPath, true);
+        BufferedReader br = new BufferedReader(new FileReader(localPath.toString()));
+        String line;
+        while ((line = br.readLine()) != null) {
+            outputStream.writeBytes(line + "
+");
+        }
+        br.close();
+        outputStream.close();
+        System.out.println("File successfully written to HDFS: " + hdfsPath);
+    }
+
+    public static void readFileFromHDFS(FileSystem fs, Path hdfsPath) throws IOException {
+        if (!fs.exists(hdfsPath)) {
+            System.out.println("File not found in HDFS: " + hdfsPath);
+            return;
+        }
+        FSDataInputStream inputStream = fs.open(hdfsPath);
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        while ((line = br.readLine()) != null) {
+            System.out.println(line);
+        }
+        br.close();
+        inputStream.close();
+    }
+}
+
+
+5. HDFSDirectoryOperations.java
+(from EXP-3.docx)
+-------------------------------------------------------
+
+import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.*;
+
+public class HDFSDirectoryOperations {
+
+    public static void main(String[] args) throws IOException {
+        Configuration conf = new Configuration();
+        conf.set("fs.defaultFS", "hdfs://quickstart.cloudera:8020");
+        FileSystem fs = FileSystem.get(conf);
+        Path sourceDir = new Path("/user/hadoop/source");
+        Path destDir = new Path("/user/hadoop/destination");
+        createDirectory(fs, sourceDir);
+        createDirectory(fs, destDir);
+        Path sourceFile = new Path("/user/hadoop/source/sample.txt");
+        Path destFile = new Path("/user/hadoop/destination/sample.txt");
+        copyFile(fs, sourceFile, destFile);
+        fs.close();
+    }
+
+    public static void createDirectory(FileSystem fs, Path dirPath) throws IOException {
+        if (fs.exists(dirPath)) {
+            System.out.println("Directory already exists: " + dirPath);
+        } else {
+            fs.mkdirs(dirPath);
+            System.out.println("Directory created: " + dirPath);
+        }
+    }
+
+    public static void copyFile(FileSystem fs, Path source, Path dest) throws IOException {
+        if (!fs.exists(source)) {
+            System.out.println("Source file does not exist: " + source);
+            return;
+        }
+        FileUtil.copy(fs, source, fs, dest, false, fs.getConf());
+        System.out.println("File copied from " + source + " to " + dest);
+    }
+}
