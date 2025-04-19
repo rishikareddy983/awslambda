@@ -1,0 +1,417 @@
+2. Program to Perform Read and Write Operations Between Local File System and HDFS Using FileSystem API
+
+import java.io.*;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.*;
+
+public class HDFSFileOperations {
+    
+    public static void main(String[] args) throws IOException {
+        // Load Hadoop configuration
+        Configuration conf = new Configuration();
+        
+        // Set HDFS NameNode URI (change this based on your Hadoop cluster setup)
+        conf.set("fs.defaultFS", "hdfs://quickstart.cloudera:8020");
+
+        // Get the HDFS FileSystem object
+        FileSystem fs = FileSystem.get(conf);
+
+        // Define local and HDFS file paths
+        Path localFilePath = new Path("/home/cloudera/sample.txt");  // Local file path
+        Path hdfsFilePath = new Path("/user/hadoop/sample.txt"); // HDFS destination path
+
+        // 1WRITE from Local File System to HDFS
+        writeFileToHDFS(fs, localFilePath, hdfsFilePath);
+
+        // 2READ from HDFS to Local File System
+        readFileFromHDFS(fs, hdfsFilePath);
+        
+        // Close the FileSystem
+        fs.close();
+    }
+
+    // Method to Write a File from Local System to HDFS
+    public static void writeFileToHDFS(FileSystem fs, Path localPath, Path hdfsPath) throws IOException {
+        // Open input stream to read from local file system
+        FSDataOutputStream outputStream = fs.create(hdfsPath, true);
+        BufferedReader br = new BufferedReader(new FileReader(localPath.toString()));
+        
+        String line;
+        while ((line = br.readLine()) != null) {
+            outputStream.writeBytes(line + "\n");
+        }
+
+        br.close();
+        outputStream.close();
+        System.out.println("File successfully written to HDFS: " + hdfsPath);
+    }
+
+    // Method to Read a File from HDFS
+    public static void readFileFromHDFS(FileSystem fs, Path hdfsPath) throws IOException {
+        if (!fs.exists(hdfsPath)) {
+            System.out.println("File not found in HDFS: " + hdfsPath);
+            return;
+        }
+        
+        FSDataInputStream inputStream = fs.open(hdfsPath);
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+
+        System.out.println("Reading file from HDFS:");
+        String line;
+        while ((line = br.readLine()) != null) {
+            System.out.println(line);
+        }
+
+        br.close();
+        inputStream.close();
+    }
+}
+
+
+
+
+HDFSFileOperations Execution steps:
+
+echo "Hello from local file" > /home/cloudera/sample.txt
+Now right-click on your HDFSFileOperations.java > Run As > Java Application.
+
+if terminal:
+javac -classpath `hadoop classpath` -d . HDFSFileOperations.java
+jar -cvf HDFSFileOperations.jar *
+hadoop jar HDFSFileOperations.jar HDFSFileOperations
+# To list file
+hdfs dfs -ls /user/hadoop/
+# To view file
+hdfs dfs -cat /user/hadoop/sample.txt
+
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------
+
+
+3. Program to Create Directories and Copy Files Between Directories Using Hadoop FileSystem API
+
+import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.*;
+
+public class HDFSDirectoryOperations {
+
+    public static void main(String[] args) throws IOException {
+        // Load Hadoop configuration
+        Configuration conf = new Configuration();
+        conf.set("fs.defaultFS", "hdfs://quickstart.cloudera:8020");
+
+        // Get the FileSystem object for HDFS
+        FileSystem fs = FileSystem.get(conf);
+
+        // Define source and destination directories in HDFS
+        Path sourceDir = new Path("/user/hadoop/source");
+        Path destDir = new Path("/user/hadoop/destination");
+
+        // 1 Create Directories in HDFS
+        createDirectory(fs, sourceDir);
+        createDirectory(fs, destDir);
+
+        // 2 Copy File from One Directory to Another in HDFS
+        Path sourceFile = new Path("/user/hadoop/source/sample.txt");
+        Path destFile = new Path("/user/hadoop/destination/sample.txt");
+        copyFile(fs, sourceFile, destFile);
+
+        // Close the FileSystem
+        fs.close();
+    }
+
+    // Method to Create a Directory in HDFS
+    public static void createDirectory(FileSystem fs, Path dirPath) throws IOException {
+        if (fs.exists(dirPath)) {
+            System.out.println("Directory already exists: " + dirPath);
+        } else {
+            fs.mkdirs(dirPath);
+            System.out.println("Directory created: " + dirPath);
+        }
+    }
+
+    // Method to Copy a File from One Directory to Another in HDFS
+    public static void copyFile(FileSystem fs, Path source, Path dest) throws IOException {
+        if (!fs.exists(source)) {
+	    FSDataOutputStream out = fs.create(source);
+	    out.writeUTF("Hello from smiths");
+	    out.close();
+
+        }
+
+        // Copy file within HDFS
+        FileUtil.copy(fs, source, fs, dest, false, fs.getConf());
+        System.out.println("File copied from " + source + " to " + dest);
+    }
+}
+
+HDFSDirectoryOperations Execution steps:
+
+#Make sure Hadoop is running
+#You can check using:
+start-dfs.sh     # Starts NameNode and DataNode
+start-yarn.sh    # Starts ResourceManager and NodeManager
+hdfs dfsadmin -report
+#Before running the above program, ensure that /user/hadoop/source/sample.txt exists:
+hdfs dfs -put sample.txt /user/hadoop/source/
+#Right-click > Run As > Java Application.
+
+
+-------------------------------------------------------------------------------------------
+
+# word count
+import java.io.IOException;
+import java.util.StringTokenizer;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class WordCount {
+
+  public static class TokenizerMapper
+       extends Mapper<Object, Text, Text, IntWritable>{
+
+    private final static IntWritable one = new IntWritable(1);
+    private Text word = new Text();
+
+    public void map(Object key, Text value, Context context
+                    ) throws IOException, InterruptedException {
+      StringTokenizer itr = new StringTokenizer(value.toString());
+      while (itr.hasMoreTokens()) {
+        word.set(itr.nextToken());
+        context.write(word, one);
+      }
+    }
+  }
+
+  public static class IntSumReducer
+       extends Reducer<Text,IntWritable,Text,IntWritable> {
+    private IntWritable result = new IntWritable();
+
+    public void reduce(Text key, Iterable<IntWritable> values,
+                       Context context
+                       ) throws IOException, InterruptedException {
+      int sum = 0;
+      for (IntWritable val : values) {
+        sum += val.get();
+      }
+      result.set(sum);
+      context.write(key, result);
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    Job job = Job.getInstance(conf, "word count");
+    job.setJarByClass(WordCount.class);
+    job.setMapperClass(TokenizerMapper.class);
+    job.setCombinerClass(IntSumReducer.class);
+    job.setReducerClass(IntSumReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    System.exit(job.waitForCompletion(true) ? 0 : 1);
+  }
+}
+
+
+WordCount Execution steps: 
+(hdfs dfs -rm -r /out1 #if out1 already exits delete it)
+
+pwd
+ls
+cat > /home/cloudera/ProcessFile1.txt #ctrl + d to exit
+cat /home/cloudera/ProcessFile1.txt
+hdfs dfs -ls /
+hdfs dfs -mkdir /inputfolder1
+hdfs dfs -put /home/cloudera/ProcessFile1.txt /inputFolder1
+hdfs dfs -cat /inputfolder1/ProcessFile1.txt
+hadoop jar /home/cloudera/WordCount.jar WordCount /inputfolder1/ProcessFile1.txt /out1
+hdfs dfs -ls /out1
+hdfs dfs -cat /out1/part-r-000000
+
+------------------------------------------------------------------------
+# emp
+package com.example.employeesalary;
+
+import java.io.IOException;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class EmployeeSalary {
+
+    // Mapper Class
+    public static class SalaryMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+        private Text department = new Text();
+        private IntWritable salary = new IntWritable();
+
+        @Override
+        protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+            String line = value.toString();
+            String[] fields = line.split("\\s+");
+            if (fields.length == 3) {
+                department.set(fields[1]);
+                salary.set(Integer.parseInt(fields[2]));
+                context.write(department, salary);
+            }
+        }
+    }
+
+    // Reducer Class
+    public static class SalaryReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+        @Override
+        protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            int sum = 0;
+            for (IntWritable val : values) {
+                sum += val.get();
+            }
+            context.write(key, new IntWritable(sum));
+        }
+    }
+
+    // Driver Class
+    public static void main(String[] args) throws Exception {
+        if (args.length != 2) {
+            System.err.println("Usage: EmployeeSalary <input path> <output path>");
+            System.exit(-1);
+        }
+
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "Employee Salary Sum");
+
+        job.setJarByClass(EmployeeSalary.class);
+        job.setMapperClass(SalaryMapper.class);
+        job.setReducerClass(SalaryReducer.class);
+
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
+}
+
+
+EmpSalary Execution steps:
+
+pwd
+ls
+cat > /home/cloudera/employee.txt #ctrl + d to exit
+cat /home/cloudera/employee.txt
+hdfs dfs -ls /
+hdfs dfs -mkdir /inputsalary
+hdfs dfs -put /home/cloudera/employee.txt /inputsalary
+hdfs dfs -ls /inputsalary/employee.txt
+Hadoop jar /home/cloudera/EmpSalary.jar EmpSalary /inputsalary/employee.txt /outputsalary
+hdfs dfs -ls /outputsalary
+hdfs dfs -cat /outputsalary/part-r-00000
+
+---------------------------------------------------------------------------
+
+#  temperature
+import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class MaxTemperature {
+
+    // Mapper Class
+    public static class MaxTempMapper extends Mapper<Object, Text, Text, IntWritable> {
+        private Text year = new Text();
+        private IntWritable temperature = new IntWritable();
+
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            String[] fields = value.toString().split("\\s+");
+            if (fields.length == 2) {
+                year.set(fields[0]); // Extract year
+                temperature.set(Integer.parseInt(fields[1])); // Extract temperature
+                context.write(year, temperature);
+            }
+        }
+    }
+
+    // Reducer Class
+    public static class MaxTempReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+        public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            int maxTemp = Integer.MIN_VALUE;
+            for (IntWritable val : values) {
+                maxTemp = Math.max(maxTemp, val.get());
+            }
+            context.write(key, new IntWritable(maxTemp));
+        }
+    }
+
+    // Driver Program
+    public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "Max Temperature");
+        job.setJarByClass(MaxTemperature.class);
+        job.setMapperClass(MaxTempMapper.class);
+        job.setReducerClass(MaxTempReducer.class);
+
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
+}
+
+
+MaxTemperature Execution steps:
+
+pwd
+ls
+cat > /home/cloudera/weather_data.txt #ctrl + d to exit
+cat /home/cloudera/weather_data.txt
+hdfs dfs -ls /
+hdfs dfs -mkdir /inputweather
+hdfs dfs -put /home/cloudera/weather_data.txt /inputweather
+hdfs dfs -ls /inputweather/weather_data.txt
+hadoop -jar /home/cloudera/MaxTemperature.jar MaxTemperature /inputweather/weather_data.txt /outputweather
+hdfs dfs -ls /outputweather
+hdfs dfs -cat /outputweather/part-r-00000
+
+
+
+
+
+--------------------------------------------------------------------
+
+
+
+
+
